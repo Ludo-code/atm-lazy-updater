@@ -1,0 +1,14 @@
+#Folder Ignore
+mods/
+kubejs/
+defaultconfigs/
+config/
+packmenu/
+tmp/
+#File Wildcard Ignore
+neoforge*
+server*
+#Specific file Ignore
+user_jvm_args.txt
+startserver.bat
+latest_version.md

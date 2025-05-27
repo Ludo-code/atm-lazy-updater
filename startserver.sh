@@ -3,55 +3,63 @@ set -eu
 
 installed_version=$(cat latest_version.md)
 newer_version=$(find -name "ServerFiles-*.zip" | sed -n 's/.*ServerFiles-\(.*\)\.zip.*/\1/p')
+if [ -z "$newer_version" ]; then
+    newer_version=$installed_version
+fi
 
 echo -e "Dernière version installer : \e[32m$installed_version\e[0m \n"
 echo -e "Dernière version télécharger : \e[32m$newer_version\e[0m \n"
 
 echo "Check présence ZIP"
-
-if find -name "ServerFiles-*.zip" | grep -q . ; then
-    if [ "$(echo "$installed_version < $newer_version" | bc -l)" -eq 1 ]; then
-    echo -e "Unzip du dossier dans tmp/ \n"
-    unzip -o $(find -name "ServerFiles-*.zip" -print -quit) -d tmp/
+if [ "$(echo "$installed_version < $newer_version" | bc -l)" -eq 1 ]; then
+    if find -name "ServerFiles-*.zip" | grep -q . ; then
+        if [ "$(echo "$installed_version < $newer_version" | bc -l)" -eq 1 ]; then
+        echo -e "Unzip du dossier dans tmp/ \n"
+        unzip -o $(find -name "ServerFiles-*.zip" -print -quit) -d tmp/
+        fi
+        echo -e "Suppression des répertoires avant déplacement \n"
+        if [[ -d "config" && -d "defaultconfigs" && -d "kubejs" && -d "mods" ]]; then
+            rm -rv config defaultconfigs kubejs mods
+        else
+            echo "Aucun dossier config, defaultconfigs, kubejs ou mods trouver"
+        fi
+        echo -e "Déplacement des répertoires \n"
+        mv tmp/config tmp/defaultconfigs tmp/kubejs tmp/mods .
+        echo -e "Check de la version de neoforge \n"
+        installed_neoforge_version=$(find . -maxdepth 1 -name "neoforge-*-installer.jar" -print -quit | sed -n 's/.*neoforge-\(.*\)\-installer.jar.*/\1/p')
+        newer_neoforge_version=$(find tmp/ -name "neoforge-*-installer.jar" -print -quit | sed -n 's/.*neoforge-\(.*\)\-installer.jar.*/\1/p')
+        echo -e "Dernière version installer : \e[32m$installed_neoforge_version\e[0m \n"
+        echo -e "Dernière version télécharger : \e[32m$newer_neoforge_version\e[0m \n"
+        installed_neoforge_version_clean=$(echo "$installed_neoforge_version" | sed 's/\.//g')
+        newer_neoforge_version_clean=$(echo "$newer_neoforge_version" | sed 's/\.//g')
+        if [ "$installed_neoforge_version_clean" -lt "$newer_neoforge_version_clean" ]; then
+        echo -e "Suppression du dossier libraries et déplacement du jar d'installation et suppression de l'ancien \n"
+        if [ -d "libraries" ]; then
+            rm -rv libraries
+        else
+            echo "Aucun dossier libraries trouver"
+        fi
+        if [ -f "neoforge-$installed_neoforge_version-installer.jar" ]; then
+            rm -rv "neoforge-$installed_neoforge_version-installer.jar"
+        else
+            echo "Aucun fichier jar trouver"
+        fi
+        fichier_a_deplacer=$(find tmp/ -name "neoforge-*-installer.jar" -print -quit)
+        if [ -n "$fichier_a_deplacer" ]; then
+            mv "$fichier_a_deplacer" .
+        else
+            echo "Aucun fichier trouvé dans tmp/"
+        fi
+        fi
+    echo -e "Maj du fichier de version \n"
+    echo -e $newer_version > latest_version.md
+    echo -e "Suppression du zip et du tmp \n"
+    rm -v "ServerFiles-$newer_version.zip" "neoforge-$installed_neoforge_version-installer.jar.log"
+    rm -rv tmp/
     fi
-    echo -e "Suppression des répertoires avant déplacement \n"
-    rm -rv config defaultconfigs kubejs mods
-    echo -e "Déplacement des répertoires \n"
-    mv tmp/config tmp/defaultconfigs tmp/kubejs tmp/mods .
-    echo -e "Check de la version de neoforge \n"
-    installed_neoforge_version=$(find . -maxdepth 1 -name "neoforge-*-installer.jar" -print -quit | sed -n 's/.*neoforge-\(.*\)\-installer.jar.*/\1/p')
-    newer_neoforge_version=$(find tmp/ -name "neoforge-*-installer.jar" -print -quit | sed -n 's/.*neoforge-\(.*\)\-installer.jar.*/\1/p')
-    echo -e "Dernière version installer : \e[32m$installed_neoforge_version\e[0m \n"
-    echo -e "Dernière version télécharger : \e[32m$newer_neoforge_version\e[0m \n"
-    installed_neoforge_version_clean=$(echo "$installed_neoforge_version" | sed 's/\.//g')
-    newer_neoforge_version_clean=$(echo "$newer_neoforge_version" | sed 's/\.//g')
-    if [ "$installed_neoforge_version_clean" -lt "$newer_neoforge_version_clean" ]; then
-    echo -e "Suppression du dossier libraries et déplacement du jar d'installation et suppression de l'ancien \n"
-    if [ -d "libraries" ]; then
-        rm -rv libraries
-    else
-        echo "Aucun dossier libraries trouver"
-    fi
-    if [ -f "neoforge-$installed_neoforge_version-installer.jar" ]; then
-        rm -rv "neoforge-$installed_neoforge_version-installer.jar"
-    else
-        echo "Aucun fichier jar trouver"
-    fi
-    fichier_a_deplacer=$(find tmp/ -name "neoforge-*-installer.jar" -print -quit)
-    if [ -n "$fichier_a_deplacer" ]; then
-        mv "$fichier_a_deplacer" .
-    else
-        echo "Aucun fichier trouvé dans tmp/"
-    fi
-    fi
-    echo -e "Dernier check de la version de neoforge après déplacement"
-    installed_neoforge_version=$(find -name "neoforge-*-installer.jar" | sed -n 's/.*neoforge-\(.*\)\-installer.jar.*/\1/p')
-echo -e "Maj du fichier de version \n"
-echo -e $newer_version > latest_version.md
-echo -e "Suppression du zip et du tmp \n"
-rm -v "ServerFiles-$newer_version.zip" "neoforge-$installed_neoforge_version-installer.jar.log"
-rm -rv tmp/
 fi
+echo "Définition de la variable de la version de neoforge"
+installed_neoforge_version=$(find . -maxdepth 1 -name "neoforge-*-installer.jar" -print -quit | sed -n 's/.*neoforge-\(.*\)\-installer.jar.*/\1/p')
 echo "Pas de zip trouvé, lancement de atm dans 5 secondes"
 sleep 5
 

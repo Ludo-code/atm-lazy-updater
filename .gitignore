@@ -7,6 +7,7 @@ packmenu/
 tmp/
 libraries/
 logs/
+local/
 #File Wildcard Ignore
 neoforge*
 server*

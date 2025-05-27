@@ -5,6 +5,8 @@ defaultconfigs/
 config/
 packmenu/
 tmp/
+libraries/
+logs/
 #File Wildcard Ignore
 neoforge*
 server*
@@ -12,3 +14,6 @@ server*
 user_jvm_args.txt
 startserver.bat
 latest_version.md
+run.bat
+run.sh
+eula.txt

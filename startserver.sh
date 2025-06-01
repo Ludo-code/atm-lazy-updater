@@ -18,10 +18,25 @@ if [ "$(echo "$installed_version < $newer_version" | bc -l)" -eq 1 ]; then
         unzip -o $(find -name "ServerFiles-*.zip" -print -quit) -d tmp/
         fi
         echo -e "Suppression des répertoires avant déplacement \n"
-        if [[ -d "config" ]] && [[ -d "defaultconfigs" ]] && [[ -d "kubejs" ]] && [[ -d "mods" ]]; then
-            rm -rv config defaultconfigs kubejs mods
+        if [[ -d "config" ]]; then
+        rm -rv config
         else
-            echo "Aucun dossier config, defaultconfigs, kubejs ou mods trouver"
+        echo "Le dossier config n'existe pas."
+        fi
+        if [[ -d "defaultconfigs" ]]; then
+        rm -rv defaultconfigs
+        else
+        echo "Le dossier defaultconfigs n'existe pas."
+        fi
+        if [[ -d "kubejs" ]]; then
+        rm -rv kubejs
+        else
+        echo "Le dossier kubejs n'existe pas."
+        fi
+        if [[ -d "mods" ]]; then
+        rm -rv mods
+        else
+        echo "Le dossier mods n'existe pas."
         fi
         echo -e "Déplacement des répertoires \n"
         mv tmp/config tmp/defaultconfigs tmp/kubejs tmp/mods .

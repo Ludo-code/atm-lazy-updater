@@ -18,7 +18,7 @@ if [ "$(echo "$installed_version < $newer_version" | bc -l)" -eq 1 ]; then
         unzip -o $(find -name "ServerFiles-*.zip" -print -quit) -d tmp/
         fi
         echo -e "Suppression des répertoires avant déplacement \n"
-        if [[ -d "config" && -d "defaultconfigs" && -d "kubejs" && -d "mods" ]]; then
+        if [[ -d "config" ]] && [[ -d "defaultconfigs" ]] && [[ -d "kubejs" ]] && [[ -d "mods" ]]; then
             rm -rv config defaultconfigs kubejs mods
         else
             echo "Aucun dossier config, defaultconfigs, kubejs ou mods trouver"
